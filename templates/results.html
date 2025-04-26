@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Recommendations - {{ risk_level }} Risk</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <img src="{{ url_for('static', filename='crypto.jpg') }}" alt="Crypto Banner" class="header-imageResults">
+</head>
+<body>
+        <!-- Navigation Bar -->
+<nav class="navbar">
+    <div class="navbar-left">
+        <a href="{{ url_for('main_routes.index') }}">Home</a>
+        <a href="{{ url_for('main_routes.learning') }}">Learning</a>
+        <a href="{{ url_for('watchlist_bp.watchlist') }}">Watchlist</a>
+        <a href="{{ url_for('auth_bp.logout') }}">Logout</a>
+    </div>
+</nav>
+<div class="content-container">
+    <header class="results-page">
+        <h1 style="color: #00bfff;">Crypto Recommendations and Sentiment</h1>
+        <h2>Risk Level: {{ risk_level }}</h2>
+        <a href="{{ url_for('main_routes.index') }}" class="back-button">Back to Filters</a>
+    </header>
+
+<!-- Fear-Greed Index -->
+{% if fear_greed_value is not none %}
+<div class="fear-greed-container 
+    {% if fear_greed_value <= 24 %}extreme-fear
+    {% elif fear_greed_value <= 49 %}fear
+    {% elif fear_greed_value == 50 %}neutral
+    {% elif fear_greed_value <= 74 %}greed
+    {% else %}extreme-greed{% endif %}">
+    <h2 class="fear-greed-title">Fear-Greed Index</h2>
+    <p>Current Market Sentiment: <span class="fear-greed-value">{{ fear_greed_value }} ({{ fear_greed_label }})</span></p>
+
+    <h3>What is the Fear-Greed Index?</h3>
+    <p>The index measures market sentiment on a scale of 0 to 100:</p>
+    <ul>
+        <li><strong>0-24 (Extreme Fear)</strong> - Market is fearful, potential buy opportunity.</li>
+        <li><strong>25-49 (Fear)</strong> - Investors are cautious.</li>
+        <li><strong>50 (Neutral)</strong> - Balanced sentiment.</li>
+        <li><strong>51-74 (Greed)</strong> - Optimistic market, prices rising.</li>
+        <li><strong>75-100 (Extreme Greed)</strong> - Potential market bubble.</li>
+    </ul>
+</div>
+{% else %}
+    <p class="error">Fear-Greed Index data unavailable.</p>
+{% endif %}
+
+<!-- News Sentiment Analysis -->
+<div class="sentiment-container 
+    {% if pos_sent > neu_sent and pos_sent > neg_sent %} positive 
+    {% elif neu_sent > pos_sent and neu_sent > neg_sent %} neutral 
+    {% else %} negative {% endif %}">
+    <h2 class="sentiment-title">Bitcoin News Sentiment</h2>
+    <p><span class="positive">Positive:</span> {{ pos_sent }}%</p>
+    <p><span class="neutral">Neutral:</span> {{ neu_sent }}%</p>
+    <p><span class="negative">Negative:</span> {{ neg_sent }}%</p>
+</div>
+
+<!-- Twitter Sentiment Analysis -->
+{% if twitter_pos is not none and twitter_neu is not none and twitter_neg is not none %}
+<div class="sentiment-container 
+    {% if twitter_pos > twitter_neu and twitter_pos > twitter_neg %} positive 
+    {% elif twitter_neu > twitter_pos and twitter_neu > twitter_neg %} neutral 
+    {% else %} negative {% endif %}">
+    <h2 class="sentiment-title">Twitter Sentiment</h2>
+    <p><span class="positive">Positive:</span> {{ twitter_pos }}%</p>
+    <p><span class="neutral">Neutral:</span> {{ twitter_neu }}%</p>
+    <p><span class="negative">Negative:</span> {{ twitter_neg }}%</p>
+</div>
+{% else %}
+<p class="error">Twitter sentiment data unavailable.</p>
+{% endif %}
+
+   <!-- Crypto Recommendations -->
+{% if sector_dict %}
+    {% for sector, coins in sector_dict.items() %}
+        <h3 class="sector-heading">{{ sector }}</h3>
+        <table>
+            <tr>
+                <th>★</th>
+                <th>Name</th>
+                <th>Current Price (USD)</th>
+                <th>Market Cap (USD)</th>
+                <th>24hr Price Change (%)</th>
+                <th>30d ROI (%)</th>
+                <th>Chart</th>
+            </tr>
+            {% for coin in coins %}
+            <tr>
+                <td>
+                  {% if coin['name'] in user_watchlist %}
+                    <button class="watchlist-star filled" data-coin="{{ coin['name'] }}" data-in-watchlist="true">★</button>
+                  {% else %}
+                    <button class="watchlist-star empty" data-coin="{{ coin['name'] }}" data-in-watchlist="false">☆</button>
+                  {% endif %}
+                </td>
+                <td>{{ coin['name'] }}</td>
+                <td>${{ "{:,.2f}".format(coin['current_price']) }}</td>
+                <td>${{ "{:,.2f}".format(coin['market_cap']) }}</td>
+                <td>{{ "{:.2f}".format(coin['price_change_percentage_24h']) }}%</td>
+                <td>{{ "{:.2f}".format(coin['potential_roi']) }}%</td>
+                <td>
+                    <button class="chart-btn" data-coin="{{ coin['id'] }}">View Chart</button>
+                </td>
+            </tr>
+            <tr class="chart-row" data-coin="{{ coin['id'] }}" style="display:none;">
+                <td colspan="7">
+                    <canvas id="chart-{{ coin['id'] }}"></canvas>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% endfor %}
+{% else %}
+    <p class="error">No sector data available.</p>
+{% endif %}
+
+
+<script>
+const activeCharts = {};
+
+document.querySelectorAll('.chart-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const coinId = btn.getAttribute('data-coin');
+        // Hide other chart rows
+        document.querySelectorAll('.chart-row').forEach(row => {
+            if (row.getAttribute('data-coin') !== coinId) row.style.display = 'none';
+        });
+        const row = document.querySelector(`.chart-row[data-coin="${coinId}"]`);
+        const ctx = document.getElementById(`chart-${coinId}`).getContext('2d');
+
+        // Toggle visibility
+        if (row.style.display === 'none') {
+            row.style.display = '';
+            fetch(`/chart/${coinId}?days=30`)
+                .then(res => res.json())
+                .then(data => {
+                    const labels = data.map(dp => new Date(dp[0]).toLocaleDateString());
+                    const prices = data.map(dp => dp[1]);
+                    if (activeCharts[coinId]) activeCharts[coinId].destroy();
+                    activeCharts[coinId] = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels,
+                            datasets: [{
+                                label: coinId + ' Price (USD)',
+                                data: prices,
+                                fill: false,
+                                tension: 0.1
+                            }]
+                        },
+                        options: {
+                            scales: {
+                                x: { display: true, title: { display: true, text: 'Date' } },
+                                y: { display: true, title: { display: true, text: 'Price (USD)' } }
+                            }
+                        }
+                    });
+                })
+                .catch(err => console.error('Error loading chart:', err));
+        } else {
+            row.style.display = 'none';
+        }
+    });
+});
+</script>
+
+<script>
+function showToast(message) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.className = 'toast show';
+    setTimeout(() => {
+        toast.className = 'toast';
+    }, 2000);
+}
+
+document.querySelectorAll('.watchlist-star').forEach(button => {
+    button.addEventListener('click', async (e) => {
+        const coinName = button.getAttribute('data-coin');
+        const inWatchlist = button.getAttribute('data-in-watchlist') === 'true';
+
+        let url = '';
+        let method = 'POST';
+
+        if (inWatchlist) {
+            url = '/remove_from_watchlist_by_name';
+        } else {
+            url = '/add_to_watchlist';
+        }
+
+        const formData = new FormData();
+        formData.append('coin_name', coinName);
+
+        const response = await fetch(url, {
+            method: 'POST',
+            body: formData
+        });
+
+        if (response.ok) {
+            if (inWatchlist) {
+                button.textContent = '☆';
+                button.classList.remove('filled');
+                button.classList.add('empty');
+                button.setAttribute('data-in-watchlist', 'false');
+                showToast('Removed from Watchlist');
+            } else {
+                button.textContent = '★';
+                button.classList.remove('empty');
+                button.classList.add('filled');
+                button.setAttribute('data-in-watchlist', 'true');
+                showToast('Added to Watchlist');
+            }
+        } else {
+            console.error('Error updating watchlist.');
+        }
+    });
+});
+</script>
+
+<div id="toast" class="toast"></div>
+</div>
+</body>
+</html>

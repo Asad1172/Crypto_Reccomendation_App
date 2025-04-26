@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Recommendation</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <img src="{{ url_for('static', filename='crypto.jpg') }}" alt="Crypto Banner" class="header-image">
+</head>
+<body>
+    <!-- Navigation Bar -->
+<nav class="navbar">
+    <div class="navbar-left">
+        <a href="{{ url_for('main_routes.index') }}">Home</a>
+        <a href="{{ url_for('main_routes.learning') }}">Learning</a>
+        <a href="{{ url_for('watchlist_bp.watchlist') }}">Watchlist</a>
+        <a href="{{ url_for('auth_bp.logout') }}">Logout</a>
+    </div>
+</nav>
+<div class="centered-container">
+    <div class="overlay-box">
+    <h1 style="color: #00bfff;">Welcome to Crypto Recommendation</h1>
+
+    {% if current_user.is_authenticated %}
+        <p>Welcome, {{ current_user.email }}!</p>
+        <!-- Crypto Dashboard Section -->
+            <form method="GET" action="{{ url_for('main_routes.results') }}">
+                <label for="risk_level">Choose your risk level:</label><br>
+                <select name="risk_level" id="risk_level" style="font-size: 1.2em; padding: 0.5em;">
+                    <option value="high">High</option>
+                    <option value="medium">Medium</option>
+                    <option value="low">Low</option>
+                </select><br><br>
+                <label for="sector">Choose your preferred sector:</label><br>
+                <select name="sector" id="sector" style="font-size: 1.2em; padding: 0.5em;">
+                    <option value="all">All</option>
+                    <option value="layer 1">Layer 1</option>
+                    <option value="layer 2">Layer 2</option>
+                    <option value="stable">Stable</option>
+                    <option value="defi">DeFi</option>
+                    <option value="nft">NFT</option>
+                    <option value="exchange">Exchange</option>
+                    <option value="infrastructure">Infrastructure</option>
+                    <option value="gaming">Gaming</option>
+                    <option value="meme">Meme</option>
+                    <option value="privacy">Privacy</option>
+                    <option value="oracle">Oracle</option>
+                    <option value="interoperability">Interoperability</option>
+                    <option value="payment">Payment</option>
+                    <option value="synthetic assets">Synthetic Assets</option>
+                    <option value="other">Other</option>
+                </select><br><br>
+                <button type="submit" style="display: block; margin: 0 auto; font-size: 1.2em; padding: 0.5em 1em;">Get Recommendations</button>
+            </form>
+        </div>
+               
+    {% else %}
+        <!--  Show Login/Register when NOT logged in -->
+        <p>
+            <a href="{{ url_for('auth_bp.register') }}">Register</a> |
+            <a href="{{ url_for('auth_bp.login') }}">Login</a>
+        </p>
+    {% endif %}
+</div>
+</body>
+</html>

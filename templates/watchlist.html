@@ -1,0 +1,73 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="watchlist-background">
+    <nav class="navbar">
+        <div class="navbar-left">
+            <a href="{{ url_for('main_routes.index') }}">Home</a>
+            <a href="{{ url_for('main_routes.learning') }}">Learning</a>
+            <a href="{{ url_for('watchlist_bp.watchlist') }}">Watchlist</a>
+            <a href="{{ url_for('auth_bp.logout') }}">Logout</a>
+        </div>
+    </nav>
+    <div class="watchlist-container">
+        <h1>Your Watchlist</h1>
+        {% if watchlist_coins %}
+            <table class="watchlist-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Current Price (USD)</th>
+                        <th>Market Cap (USD)</th>
+                        <th>24hr Price Change (%)</th>
+                        <th>30d ROI (%)</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for coin in watchlist_coins %}
+                    <tr>
+                        <td>{{ coin.name }}</td>
+                        <td>
+                          {% if coin.current_price is not none %}
+                            ${{ "{:,.2f}".format(coin.current_price) }}
+                          {% else %}
+                            N/A
+                          {% endif %}
+                        </td>
+                        <td>
+                          {% if coin.market_cap is not none %}
+                            ${{ "{:,.2f}".format(coin.market_cap) }}
+                          {% else %}
+                            N/A
+                          {% endif %}
+                        </td>
+                        <td>
+                          {% if coin.price_change_percentage_24h is not none %}
+                            {{ "{:.2f}".format(coin.price_change_percentage_24h) }}%
+                          {% else %}
+                            N/A
+                          {% endif %}
+                        </td>
+                        <td>
+                          {% if coin.potential_roi is not none %}
+                            {{ "{:.2f}".format(coin.potential_roi) }}%
+                          {% else %}
+                            N/A
+                          {% endif %}
+                        </td>
+                        <td>
+                            <form action="{{ url_for('watchlist_bp.remove_from_watchlist', coin_id=coin.entry_id) }}" method="POST">
+                                <button type="submit" class="remove-btn">Remove</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>Your watchlist is empty.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Crypto Learning Hub</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <img src="{{ url_for('static', filename='crypto.jpg') }}" alt="Crypto Banner" class="header-image">
+</head>
+<body>
+        <!-- Navigation Bar -->
+<nav class="navbar">
+    <div class="navbar-left">
+        <a href="{{ url_for('main_routes.index') }}">Home</a>
+        <a href="{{ url_for('main_routes.learning') }}">Learning</a>
+        <a href="{{ url_for('watchlist_bp.watchlist') }}">Watchlist</a>
+        <a href="{{ url_for('auth_bp.logout') }}">Logout</a>
+    </div>
+</nav>
+
+<div class="overlay-content">
+    <h1 style="color: #00bfff;">Welcome to Crypto Learning Hub</h1>
+
+    <section class="learning-section">
+        <h2>What is Cryptocurrency?</h2>
+        <p>Cryptocurrencies are digital or virtual currencies that use cryptography for security and operate on decentralized networks called blockchains.</p>
+    </section>
+
+    <section class="learning-section">
+        <h2>What is Market Capitalization?</h2>
+        <p>Market capitalization is the total value of a cryptocurrency, calculated as price × circulating supply.</p>
+    </section>
+
+    <section class="learning-section">
+        <h2>What is Risk Level?</h2>
+        <p>Risk levels categorize cryptocurrencies based on their market stability, price fluctuations, and reliability.</p>
+    </section>
+
+    <section class="learning-section">
+        <h2>What is ROI (Return on Investment)?</h2>
+        <p>ROI measures the profitability of an investment, calculated as a percentage increase or decrease from the original investment amount.</p>
+    </section>
+
+    <section class="learning-section">
+        <h2>What is Sentiment Analysis?</h2>
+        <p>Sentiment analysis uses algorithms to determine whether news and social media reactions to cryptocurrencies are positive, neutral, or negative.</p>
+    </section>
+
+    <section class="learning-section">
+        <h2>What is the Fear-Greed Index?</h2>
+        <p>The Fear-Greed Index measures the emotions driving the cryptocurrency market, ranging from extreme fear to extreme greed.</p>
+    </section>
+    <section class="learning-section">
+        <h2>Where to invest?</h2>
+        <p>One of the best safest places to invest in cryptocurrencies is the crypto platform Coinbase, instructions on how to create an account and invest are on their site</p>
+    </section>
+</div>
+
+</body>
+</html>

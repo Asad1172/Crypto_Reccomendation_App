@@ -1,0 +1,10 @@
+flask
+flask_sqlalchemy
+flask_login
+werkzeug
+gunicorn
+python-dotenv
+snscrape
+vaderSentiment
+newspaper3k
+googlesearch-python
