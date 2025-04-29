@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
-from services.crypto_service import fetch_crypto_data, fetch_fear_greed_index, fetch_bitcoin_news_sentiment, fetch_historical_prices
+from services.crypto_service import fetch_crypto_data, fetch_fear_greed_index, fetch_bitcoin_news_sentiment, fetch_historical_prices_from_coingecko, predict_30_day_roi
+from services.crypto_service import ID_TO_SYMBOL
 from flask_login import login_required
 from services.twitter_sentiment import fetch_twitter_sentiment
 from models import Watchlist
@@ -54,6 +55,19 @@ def results():
 
     crypto_data = filtered_data
 
+    # For each coin, predict the 30-day ROI and add it to the coin dictionary
+    for coin in crypto_data:
+        try:
+            symbol = ID_TO_SYMBOL.get(coin['id'])  # Correct symbol lookup
+            if symbol:
+                predicted_roi = predict_30_day_roi(symbol)
+            else:
+                predicted_roi = None
+            coin['potential_roi'] = round(predicted_roi, 2) if predicted_roi is not None else 'N/A'
+        except Exception as e:
+            print(f"Error predicting ROI for {coin['id']}: {e}")
+            coin['potential_roi'] = 'N/A'
+
     # Rebuild sector dictionary for rendering
     sector_dict = {}
     for coin in crypto_data:
@@ -107,5 +121,5 @@ def chart(coin_id):
     Query param 'days' (int) controls how many past days to fetch (default 30).
     """
     days = request.args.get("days", default=30, type=int)
-    data = fetch_historical_prices(coin_id, days)
+    data = fetch_historical_prices_from_coingecko(coin_id, days)
     return jsonify(data)

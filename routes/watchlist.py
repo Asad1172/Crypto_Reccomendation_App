@@ -15,7 +15,7 @@ def watchlist():
     watchlist_coins = []
 
     if entries:
-        # Bypass filters: fetch all coins from CoinGecko markets endpoint
+        # Fetch all market coins from CoinGecko
         response = requests.get(
             'https://api.coingecko.com/api/v3/coins/markets',
             params={
@@ -27,14 +27,20 @@ def watchlist():
             }
         )
         coins = response.json() if response.ok else []
-        # Build map by lowercase coin names for case-insensitive matching
         coin_map = {coin.get('name', '').lower(): coin for coin in coins if isinstance(coin, dict) and 'name' in coin}
+
+        from services.crypto_service import ID_TO_SYMBOL, predict_30_day_roi
 
         for entry in entries:
             entry_name = entry.coin_name.lower()
             api_coin = coin_map.get(entry_name)
             if api_coin:
-                potential_roi = api_coin.get('price_change_percentage_30d_in_currency')
+                symbol = ID_TO_SYMBOL.get(api_coin.get('id'))
+                if symbol:
+                    potential_roi = predict_30_day_roi(symbol)
+                    potential_roi = round(potential_roi, 2) if potential_roi is not None else 'N/A'
+                else:
+                    potential_roi = 'N/A'
 
                 coin_data = {
                     'entry_id': entry.id,

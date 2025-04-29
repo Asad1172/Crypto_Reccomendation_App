@@ -93,7 +93,7 @@ button:hover {
 .fear-greed-value {
     font-size: 18px;
     font-weight: bold;
-    color: #dc3545;
+    color: black;
 }
 
 /* Dynamic background color classes for fear-greed-container */
@@ -106,7 +106,8 @@ button:hover {
 }
 
 .fear-greed-container.neutral {
-    background-color: #ffe066;
+    background-color: #fff9cc; /* Soft Light Yellow */
+    color: black;
 }
 
 .fear-greed-container.greed {

@@ -28,22 +28,41 @@
 <!-- Fear-Greed Index -->
 {% if fear_greed_value is not none %}
 <div class="fear-greed-container 
-    {% if fear_greed_value <= 24 %}extreme-fear
-    {% elif fear_greed_value <= 49 %}fear
-    {% elif fear_greed_value == 50 %}neutral
-    {% elif fear_greed_value <= 74 %}greed
-    {% else %}extreme-greed{% endif %}">
+    {% if fear_greed_value <= 24 %}
+        extreme-fear
+    {% elif fear_greed_value <= 49 %}
+        fear
+    {% elif fear_greed_value <= 54 %}
+        neutral
+    {% elif fear_greed_value <= 74 %}
+        greed
+    {% else %}
+        extreme-greed
+    {% endif %}
+">
     <h2 class="fear-greed-title">Fear-Greed Index</h2>
-    <p>Current Market Sentiment: <span class="fear-greed-value">{{ fear_greed_value }} ({{ fear_greed_label }})</span></p>
+    <p>Current Market Sentiment: <span class="fear-greed-value 
+    {% if fear_greed_value <= 24 %}
+        extreme-fear
+    {% elif fear_greed_value <= 49 %}
+        fear
+    {% elif fear_greed_value <= 54 %}
+        neutral
+    {% elif fear_greed_value <= 74 %}
+        greed
+    {% else %}
+        extreme-greed
+    {% endif %}
+  ">{{ fear_greed_value }} ({{ fear_greed_label }})</span></p>
 
     <h3>What is the Fear-Greed Index?</h3>
     <p>The index measures market sentiment on a scale of 0 to 100:</p>
     <ul>
-        <li><strong>0-24 (Extreme Fear)</strong> - Market is fearful, potential buy opportunity.</li>
-        <li><strong>25-49 (Fear)</strong> - Investors are cautious.</li>
-        <li><strong>50 (Neutral)</strong> - Balanced sentiment.</li>
-        <li><strong>51-74 (Greed)</strong> - Optimistic market, prices rising.</li>
-        <li><strong>75-100 (Extreme Greed)</strong> - Potential market bubble.</li>
+        <li><strong>0-24 (Extreme Fear)</strong> - Market is highly fearful, prices dropping rapidly.</li>
+        <li><strong>25-49 (Fear)</strong> - Market is fearful, prices declining steadily.</li>
+        <li><strong>50-54 (Neutral)</strong> - Balanced sentiment, uncertain direction.</li>
+        <li><strong>55-74 (Greed)</strong> - Market is optimistic, prices rising steadily.</li>
+        <li><strong>75-100 (Extreme Greed)</strong> - Overwhelming greed, strong price surges, potential bubbles.</li>
     </ul>
 </div>
 {% else %}
@@ -87,7 +106,7 @@
                 <th>Current Price (USD)</th>
                 <th>Market Cap (USD)</th>
                 <th>24hr Price Change (%)</th>
-                <th>30d ROI (%)</th>
+                <th>Predicted 30-Day ROI (%)</th>
                 <th>Chart</th>
             </tr>
             {% for coin in coins %}
@@ -103,7 +122,13 @@
                 <td>${{ "{:,.2f}".format(coin['current_price']) }}</td>
                 <td>${{ "{:,.2f}".format(coin['market_cap']) }}</td>
                 <td>{{ "{:.2f}".format(coin['price_change_percentage_24h']) }}%</td>
-                <td>{{ "{:.2f}".format(coin['potential_roi']) }}%</td>
+                <td>
+                  {% if coin['potential_roi'] is not none and coin['potential_roi'] != 'N/A' %}
+                      {{ "{:.2f}".format(coin['potential_roi']) }}%
+                  {% else %}
+                      N/A
+                  {% endif %}
+                </td>
                 <td>
                     <button class="chart-btn" data-coin="{{ coin['id'] }}">View Chart</button>
                 </td>
